@@ -1,0 +1,30 @@
+name: Check Quarkus Native Build
+
+on:
+  push:
+    branches: [ main, feature/quarkusEnhancedClient ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  native-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Native Image
+        # Aquí es donde ocurre la magia. GitHub usará Docker para crear el binario.
+        run: ./mvnw package -Dnative -Dquarkus.native.container-build=true -DskipTests
+
+      - name: Verify build artifact
+        # Un pequeño paso extra para confirmar que el archivo ZIP existe
+        run: ls -lh target/function.zip
